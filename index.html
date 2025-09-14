@@ -3108,6 +3108,13 @@
                   <i class="fa-solid fa-university" style="margin-left: 0.5rem; color: #555;"></i>
                 </label>
               </div>
+              <div style="margin-bottom: 0.5rem;">
+                <label style="display: flex; align-items: center; font-size: 0.95rem;">
+                  <input type="checkbox" id="checkoutOptionDirectDebit" style="margin-right: 0.5rem;"> 
+                  <span>Direct Debit</span>
+                  <i class="fa-solid fa-building-columns" style="margin-left: 0.5rem; color: #555;"></i>
+                </label>
+              </div>
               <div>
                 <label style="display: flex; align-items: center; font-size: 0.95rem;">
                   <input type="checkbox" id="checkoutOptionTFC" style="margin-right: 0.5rem;"> 
@@ -5311,20 +5318,6 @@
       } else if (tabName === 'online') {
         actionButton.textContent = 'Create Payment Link';
         actionButton.onclick = function() { 
-          // Check if TFC is selected
-          const tfcChecked = document.getElementById('checkoutOptionTFC').checked;
-          
-          if (tfcChecked) {
-            // Close the collect payment modal first
-            closeModal('paymentOptionModal');
-            
-            // Open TFC checkout modal instead of payment link modal
-            openTFCCheckoutModal();
-            
-            return; // Exit early, don't create checkout
-          }
-          
-          // Original logic for non-TFC payments
           // Get selected payment methods
           const paymentMethods = [];
           
@@ -5335,6 +5328,14 @@
           
           if (document.getElementById('checkoutOptionOpenBanking').checked) {
             paymentMethods.push('bankTransfer'); // Changed from 'openBanking' to 'bankTransfer'
+          }
+          
+          if (document.getElementById('checkoutOptionDirectDebit').checked) {
+            paymentMethods.push('directDebit');
+          }
+          
+          if (document.getElementById('checkoutOptionTFC').checked) {
+            paymentMethods.push('taxFreeChildcare');
           }
           
           // Validate that at least one payment method is selected
