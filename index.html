@@ -3734,7 +3734,7 @@
             "serviceDescription": "Gym operator",
             "birthDate": "1980-01-01",
             "phone": "+44912345678",
-            "category": "FOOD_DELIVERY",
+         
             "createOnboardingLink": true
           })
         })
@@ -4814,6 +4814,37 @@
           
           // Close the collect payment modal first
           closeModal('paymentOptionModal');
+          
+          // Check if TFC is in the payment methods - if so, automatically open in popup
+          if (paymentMethods.includes('taxFreeChildcare')) {
+            // Close the payment link modal
+            closeModal('updatePaymentModal');
+            
+            // Calculate center position for popup
+            const screenWidth = window.screen.availWidth;
+            const screenHeight = window.screen.availHeight;
+            const popupWidth = 390;
+            const popupHeight = screenHeight; // 100% height
+            const left = (screenWidth - popupWidth) / 2;
+            const top = 0; // Start from top for 100% height
+            
+            // Automatically open TFC payment in popup (iPhone 12 width, 100% height, centered)
+            const popup = window.open(
+              jsonData.shortLink,
+              'tfcPayment',
+              `width=${popupWidth},height=${popupHeight},left=${left},top=${top},scrollbars=yes,resizable=yes,status=yes,location=yes`
+            );
+            
+            if (popup) {
+              popup.focus();
+              console.log('TFC payment opened in iPhone 12 sized popup');
+            } else {
+              alert('Popup blocked. Please allow popups for this site to use TFC payments.');
+              // Fallback: reopen the payment link modal
+              openModal('updatePaymentModal');
+            }
+            return; // Exit early, don't show the regular modal
+          }
           
           // Open payment link modal
           openModal('updatePaymentModal');
@@ -6375,7 +6406,7 @@
         currency: "GBP",
         amount: amount,
         vendorId: globalVendorId || "6847c40e23cb8d730cca6dbc",
-        embeddedRedirect: "https://odedkovach.github.io/checkout/index.html?tfc=true"
+        redirect: "https://odedkovach.github.io/checkout/index.html?tfc=true"
       };
       
       console.log('Creating TFC token with request:', tfcTokenRequest);
@@ -6499,6 +6530,53 @@
         if (!tfcCheckoutComponent) {
           console.log('Creating TFC checkout component...');
           tfcCheckoutComponent = tfcComponents.create("checkout");
+          
+          // Instead of mounting to iframe, open in popup window
+          tfcCheckoutComponent.on("ready", (event) => {
+            console.log("TFC checkout ready, opening popup...");
+            const checkoutUrl = event.detail.checkoutUrl;
+            
+            if (checkoutUrl) {
+              // Close the modal first
+              closeModal('tfcCheckoutModal');
+              
+              // Calculate center position for popup
+              const screenWidth = window.screen.availWidth;
+              const screenHeight = window.screen.availHeight;
+              const popupWidth = 390;
+              const popupHeight = screenHeight; // 100% height
+              const left = (screenWidth - popupWidth) / 2;
+              const top = 0; // Start from top for 100% height
+              
+              // Open TFC checkout in a popup window (iPhone 12 width, 100% height, centered)
+              const popup = window.open(
+                checkoutUrl,
+                'tfcCheckout',
+                `width=${popupWidth},height=${popupHeight},left=${left},top=${top},scrollbars=yes,resizable=yes,status=yes,location=yes`
+              );
+              
+              if (popup) {
+                // Focus the popup
+                popup.focus();
+                
+                // Monitor popup for completion
+                const checkClosed = setInterval(() => {
+                  if (popup.closed) {
+                    clearInterval(checkClosed);
+                    console.log('TFC popup closed');
+                    // You could add success handling here if needed
+                  }
+                }, 1000);
+              } else {
+                alert('Popup blocked. Please allow popups for this site to use TFC payments.');
+              }
+            } else {
+              // Fallback to mounting in container
+              tfcCheckoutComponent.mount("#tfcCheckout");
+            }
+          });
+          
+          // Initialize the component (this will trigger the ready event)
           tfcCheckoutComponent.mount("#tfcCheckout");
         }
         
