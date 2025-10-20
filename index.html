@@ -1574,24 +1574,21 @@
       
       #onboardingModal #onboarding {
         height: calc(100vh - 60px); /* Account for close button */
-        min-height: calc(100vh - 60px);
-        max-height: calc(100vh - 60px);
-        overflow-y: scroll; /* Force scroll instead of auto */
-        -webkit-overflow-scrolling: touch; /* Enable smooth scrolling on iOS */
+        width: 100%;
         border-radius: 0;
         position: relative;
+        /* Remove overflow from container - let iframe handle it */
+        overflow: visible;
       }
       
       #onboardingModal #onboarding iframe {
-        height: 100%; /* Take full height of parent container */
-        min-height: 100%;
-        max-height: 100%;
-        width: 100%;
+        height: calc(100vh - 60px) !important; /* Match parent exactly */
+        width: 100% !important;
         border-radius: 0;
         border: none;
-        /* Ensure iframe content is scrollable on iOS */
-        overflow: auto;
-        -webkit-overflow-scrolling: touch;
+        /* Let the iframe handle its own scrolling */
+        overflow: visible;
+        /* Remove webkit scrolling from iframe */
       }
 
       .pay-portal-header {
@@ -3830,6 +3827,73 @@
       initCustomDropdown();
     });
 
+    // Function to fix mobile scrolling issues with iframes
+    function fixMobileScrolling() {
+      console.log("Fixing mobile scrolling for onboarding iframe...");
+      
+      // Find the iframe inside the onboarding container
+      const onboardingContainer = document.getElementById("onboarding");
+      if (!onboardingContainer) {
+        console.log("Onboarding container not found");
+        return;
+      }
+      
+      // Wait a bit more for iframe to be created
+      setTimeout(() => {
+        const iframe = onboardingContainer.querySelector('iframe');
+        if (iframe) {
+          console.log("Found onboarding iframe, applying mobile fixes...");
+          
+          // Apply mobile-specific styles directly to iframe
+          iframe.style.height = 'calc(100vh - 60px)';
+          iframe.style.width = '100%';
+          iframe.style.border = 'none';
+          iframe.style.overflow = 'auto';
+          iframe.style.webkitOverflowScrolling = 'touch';
+          
+          // Add touch event handlers to prevent scroll blocking
+          iframe.addEventListener('touchstart', function(e) {
+            // Allow touch events to pass through
+          }, { passive: true });
+          
+          iframe.addEventListener('touchmove', function(e) {
+            // Allow touch events to pass through
+          }, { passive: true });
+          
+          // Try to access iframe content and fix scrolling (if same-origin)
+          try {
+            iframe.onload = function() {
+              try {
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                if (iframeDoc && iframeDoc.body) {
+                  console.log("Applying scrolling fixes to iframe content...");
+                  iframeDoc.body.style.webkitOverflowScrolling = 'touch';
+                  iframeDoc.body.style.overflow = 'auto';
+                  
+                  // Add meta viewport if not present
+                  let viewport = iframeDoc.querySelector('meta[name="viewport"]');
+                  if (!viewport) {
+                    viewport = iframeDoc.createElement('meta');
+                    viewport.name = 'viewport';
+                    viewport.content = 'width=device-width, initial-scale=1.0, user-scalable=yes';
+                    iframeDoc.head.appendChild(viewport);
+                  }
+                }
+              } catch (e) {
+                console.log("Cannot access iframe content (cross-origin):", e.message);
+              }
+            };
+          } catch (e) {
+            console.log("Cannot set iframe onload handler:", e.message);
+          }
+        } else {
+          console.log("Iframe not found yet, retrying...");
+          // Retry after another delay
+          setTimeout(() => fixMobileScrolling(), 500);
+        }
+      }, 500);
+    }
+
     // Function to open the onboarding component
     function openOnboardingComponent() {
       console.log("Opening onboarding component...");
@@ -3970,6 +4034,11 @@
               console.log("Displaying onboarding modal with pre-set address");
               modal.style.display = "flex";
               loadingOverlay.style.display = "none";
+              
+              // Fix mobile scrolling for the iframe after it's loaded
+              setTimeout(() => {
+                fixMobileScrolling();
+              }, 1000);
             }, 500); // Delay to ensure component is fully rendered
           })
           .catch(err => {
@@ -3982,6 +4051,11 @@
               console.log("Displaying onboarding modal (without pre-set address)");
               modal.style.display = "flex";
               loadingOverlay.style.display = "none";
+              
+              // Fix mobile scrolling for the iframe after it's loaded
+              setTimeout(() => {
+                fixMobileScrolling();
+              }, 1000);
             }, 500);
           });
         })
@@ -4134,6 +4208,11 @@
               console.log("Displaying complete onboarding modal with pre-set address");
               modal.style.display = "flex";
               loadingOverlay.style.display = "none";
+              
+              // Fix mobile scrolling for the iframe after it's loaded
+              setTimeout(() => {
+                fixMobileScrolling();
+              }, 1000);
             }, 500); // Delay to ensure component is fully rendered
           })
           .catch(err => {
@@ -4146,6 +4225,11 @@
               console.log("Displaying complete onboarding modal (without pre-set address)");
               modal.style.display = "flex";
               loadingOverlay.style.display = "none";
+              
+              // Fix mobile scrolling for the iframe after it's loaded
+              setTimeout(() => {
+                fixMobileScrolling();
+              }, 1000);
             }, 500);
           });
         })
