@@ -1570,25 +1570,32 @@
         left: 0;
         right: 0;
         bottom: 0;
+        /* Add explicit scrolling to the modal content */
+        overflow-y: scroll !important;
+        -webkit-overflow-scrolling: touch;
       }
       
       #onboardingModal #onboarding {
-        height: calc(100vh - 60px); /* Account for close button */
+        min-height: 120vh; /* Make it taller than viewport to force scrolling */
+        height: auto; /* Allow natural height */
         width: 100%;
         border-radius: 0;
         position: relative;
-        /* Remove overflow from container - let iframe handle it */
-        overflow: visible;
+        /* Add explicit scrolling */
+        overflow-y: scroll !important;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 60px; /* Add padding for close button */
       }
       
       #onboardingModal #onboarding iframe {
-        height: calc(100vh - 60px) !important; /* Match parent exactly */
+        min-height: 120vh !important; /* Force iframe to be taller than viewport */
+        height: auto !important;
         width: 100% !important;
         border-radius: 0;
         border: none;
-        /* Let the iframe handle its own scrolling */
-        overflow: visible;
-        /* Remove webkit scrolling from iframe */
+        /* Ensure iframe can scroll */
+        overflow: auto !important;
+        -webkit-overflow-scrolling: touch;
       }
 
       .pay-portal-header {
@@ -3845,11 +3852,25 @@
           console.log("Found onboarding iframe, applying mobile fixes...");
           
           // Apply mobile-specific styles directly to iframe
-          iframe.style.height = 'calc(100vh - 60px)';
+          iframe.style.minHeight = '120vh'; // Force taller than viewport
+          iframe.style.height = 'auto';
           iframe.style.width = '100%';
           iframe.style.border = 'none';
           iframe.style.overflow = 'auto';
           iframe.style.webkitOverflowScrolling = 'touch';
+          
+          // Also ensure the container is scrollable
+          onboardingContainer.style.overflowY = 'scroll';
+          onboardingContainer.style.webkitOverflowScrolling = 'touch';
+          onboardingContainer.style.minHeight = '120vh';
+          
+          // Add a test div to ensure there's scrollable content
+          const testDiv = document.createElement('div');
+          testDiv.style.height = '50px';
+          testDiv.style.background = 'transparent';
+          testDiv.style.width = '100%';
+          testDiv.innerHTML = '<!-- Scroll test -->';
+          onboardingContainer.appendChild(testDiv);
           
           // Add touch event handlers to prevent scroll blocking
           iframe.addEventListener('touchstart', function(e) {
