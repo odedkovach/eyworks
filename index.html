@@ -1384,17 +1384,16 @@
       #onboardingModal .modal-content {
         width: 95%;
         max-width: none;
-        max-height: 75vh;
+        max-height: 75vh; /* Reduced height to be less tall */
         margin: 0 auto;
-        border-radius: 16px;
+        border-radius: 16px; /* More pronounced rounded corners on mobile */
       }
 
       #onboardingModal #onboarding {
-        min-height: 430px;
+        min-height: 430px; /* Reduced height */
         max-height: calc(75vh - 20px);
         padding: 0;
         overflow-y: auto;
-        -webkit-overflow-scrolling: touch; /* Enable smooth scrolling on iOS */
         border-radius: 16px;
       }
 
@@ -1404,9 +1403,6 @@
         height: 100%;
         width: 100%;
         border-radius: 16px;
-        /* Ensure iframe content is scrollable on iOS */
-        overflow: auto;
-        -webkit-overflow-scrolling: touch;
       }
       
       #onboardingModal .close-btn {
@@ -1556,7 +1552,7 @@
       }
       
       #onboardingModal #onboarding {
-        min-height: calc(85vh - 50px);
+        min-height: calc(85vh - 50px); /* Account for close button */
         max-height: calc(85vh - 50px);
         overflow-y: auto;
         border-radius: 14px;
